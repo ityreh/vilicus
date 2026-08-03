@@ -1,0 +1,18 @@
+{
+  "name": "vilicus",
+  "version": "0.1.0",
+  "description": "Self-hosted personal assistant for managing everyday challenges",
+  "private": true,
+  "scripts": {
+    "prepare": "husky install",
+    "commit": "cz commit"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.0.0",
+    "@commitlint/config-conventional": "^19.0.0",
+    "husky": "^8.0.0"
+  },
+  "commitlint": {
+    "extends": [".commitlintrc.json"]
+  }
+}
