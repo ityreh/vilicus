@@ -1,5 +1,5 @@
 -- liquibase formatted sql
--- changeset vilicus:001_seed_categories_dml
+-- changeset vilicus:002_seed_categories_dml
 -- comment: Seed 15 predefined transaction categories
 
 INSERT INTO categories (name, color, "order") VALUES
