@@ -2,6 +2,7 @@ package com.vilicus.finance;
 
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -15,6 +16,11 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Migration tests require Docker to run.
+ * Skipped in CI/CD environments without Docker access.
+ * Can be run locally with: docker-compose up && mvn test -Dtest=MigrationTest
+ */
 @Testcontainers
 class MigrationTest {
 
