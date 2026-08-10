@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="002-seed-categories" author="vilicus">
+        <comment>Seed 15 predefined transaction categories</comment>
+
+        <insert tableName="categories">
+            <column name="name" value="Groceries"/>
+            <column name="color" value="#2ECC71"/>
+            <column name="order" value="1"/>
+        </insert>
+
+        <insert tableName="categories">
+            <column name="name" value="Utilities"/>
+            <column name="color" value="#3498DB"/>
+            <column name="order" value="2"/>
+        </insert>
+
+        <insert tableName="categories">
+            <column name="name" value="Entertainment"/>
+            <column name="color" value="#E74C3C"/>
+            <column name="order" value="3"/>
+        </insert>
+
+        <insert tableName="categories">
+            <column name="name" value="Salary"/>
+            <column name="color" value="#27AE60"/>
+            <column name="order" value="4"/>
+        </insert>
+
+        <insert tableName="categories">
+            <column name="name" value="Savings"/>
+            <column name="color" value="#16A085"/>
+            <column name="order" value="5"/>
+        </insert>
+
+        <insert tableName="categories">
+            <column name="name" value="Transport"/>
+            <column name="color" value="#F39C12"/>
+            <column name="order" value="6"/>
+        </insert>
+
+        <insert tableName="categories">
+            <column name="name" value="Insurance"/>
+            <column name="color" value="#8E44AD"/>
+            <column name="order" value="7"/>
+        </insert>
+
+        <insert tableName="categories">
+            <column name="name" value="Healthcare"/>
+            <column name="color" value="#E67E22"/>
+            <column name="order" value="8"/>
+        </insert>
+
+        <insert tableName="categories">
+            <column name="name" value="Dining"/>
+            <column name="color" value="#C0392B"/>
+            <column name="order" value="9"/>
+        </insert>
+
+        <insert tableName="categories">
+            <column name="name" value="Shopping"/>
+            <column name="color" value="#D35400"/>
+            <column name="order" value="10"/>
+        </insert>
+
+        <insert tableName="categories">
+            <column name="name" value="Subscriptions"/>
+            <column name="color" value="#34495E"/>
+            <column name="order" value="11"/>
+        </insert>
+
+        <insert tableName="categories">
+            <column name="name" value="Transfers"/>
+            <column name="color" value="#7F8C8D"/>
+            <column name="order" value="12"/>
+        </insert>
+
+        <insert tableName="categories">
+            <column name="name" value="Rent"/>
+            <column name="color" value="#C0392B"/>
+            <column name="order" value="13"/>
+        </insert>
+
+        <insert tableName="categories">
+            <column name="name" value="Taxes"/>
+            <column name="color" value="#2C3E50"/>
+            <column name="order" value="14"/>
+        </insert>
+
+        <insert tableName="categories">
+            <column name="name" value="Other"/>
+            <column name="color" value="#95A5A6"/>
+            <column name="order" value="15"/>
+        </insert>
+
+    </changeSet>
+
+</databaseChangeLog>

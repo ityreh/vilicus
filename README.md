@@ -8,7 +8,7 @@
 - Java 25
 - Maven 3.9+
 - Docker & Docker Compose
-- PostgreSQL 16 (via Docker)
+- PostgreSQL 18 (via Docker)
 
 ### Local Development Setup
 
@@ -61,7 +61,7 @@ vilicus/
 │   │   │   └── entity/
 │   │   └── resources/
 │   │       ├── application.yml
-│   │       └── db/migration/   # Flyway migrations
+│   │       └── db/changelog/   # Liquibase migrations
 │   └── test/
 ├── docker-compose.yml    # Local development environment
 ├── pom.xml              # Maven configuration
@@ -72,7 +72,8 @@ vilicus/
 
 - **Backend:** Spring Boot 4.1
 - **Language:** Java 25
-- **Database:** PostgreSQL 16
+- **Database:** PostgreSQL 18
+- **Migrations:** Liquibase
 - **Build:** Maven
 - **Testing:** JUnit 5, Mockito, TestContainers
 - **Deployment:** Kubernetes, Docker
@@ -100,14 +101,14 @@ vilicus/
 
 ### Phase 1: Foundation (Auth + DB) — Aug 10–24
 - User authentication (JWT)
-- PostgreSQL schema & migrations
+- PostgreSQL 18 schema & Liquibase migrations
 - Account management setup
 
 ### Phase 2–6: See [Implementation Roadmap](docs/ROADMAP.md)
 
 ## License
 
-MIT — See LICENSE file
+GNU Affero General Public License v3.0 — See [LICENSE](LICENSE) file for details
 
 ## Contact
 
