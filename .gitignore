@@ -1,0 +1,49 @@
+# Java / Maven
+*.class
+*.jar
+*.war
+*.ear
+target/
+.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.properties
+mvnw
+mvnw.cmd
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+*.iml
+*.iws
+*.ipr
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# Build artifacts
+dist/
+build/
+
+# Node (if applicable)
+node_modules/
+npm-debug.log
+yarn-error.log
+.yarn/cache
+
+# Temporary
+tmp/
+temp/
+
+# OS
+Thumbs.db
+.AppleDouble
+.LSOverride
