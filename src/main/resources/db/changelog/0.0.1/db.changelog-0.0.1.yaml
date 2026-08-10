@@ -1,0 +1,8 @@
+databaseChangeLog:
+  # DDL (Data Definition Language) - Schema structure
+  - include:
+      file: db/changelog/0.0.1/ddl/001_initial_schema_ddl.sql
+
+  # DML (Data Manipulation Language) - Data operations
+  - include:
+      file: db/changelog/0.0.1/dml/001_seed_categories_dml.sql
