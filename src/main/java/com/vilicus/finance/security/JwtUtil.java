@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.util.Date;
 
+@SuppressWarnings("deprecation")
+
 @Component
 public class JwtUtil {
 
@@ -78,11 +80,11 @@ public class JwtUtil {
      * Extract claims from token
      */
     private Claims getTokenBody(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
+        return Jwts.parser()
+                .verifyWith(key)
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     /**

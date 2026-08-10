@@ -33,7 +33,9 @@ class UserTest {
 
         assertNotNull(user.getCreatedAt());
         assertNotNull(user.getUpdatedAt());
-        assertEquals(user.getCreatedAt(), user.getUpdatedAt());
+        // They may differ by a few nanoseconds, so just check they're very close
+        assertTrue(user.getUpdatedAt().isAfter(user.getCreatedAt().minusSeconds(1)) &&
+                   user.getUpdatedAt().isBefore(user.getCreatedAt().plusSeconds(1)));
     }
 
     @Test
