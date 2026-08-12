@@ -241,4 +241,54 @@ class AccountServiceTest {
 
         assertEquals("Account not found", exception.getMessage());
     }
+
+    @Test
+    void testListAccounts_Success() {
+        Account account1 = Account.builder()
+                .id(1L)
+                .userId(testUserId)
+                .iban("DE89370400440532013000")
+                .name("Checking")
+                .type(AccountType.BANK_ACCOUNT)
+                .currency("EUR")
+                .balance(BigDecimal.valueOf(1000))
+                .status("active")
+                .createdAt(LocalDateTime.now().minusDays(2))
+                .updatedAt(LocalDateTime.now().minusDays(2))
+                .build();
+
+        Account account2 = Account.builder()
+                .id(2L)
+                .userId(testUserId)
+                .iban("FR1420041010050500013M026")
+                .name("Savings")
+                .type(AccountType.SAVINGS)
+                .currency("EUR")
+                .balance(BigDecimal.valueOf(5000))
+                .status("active")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+        when(accountRepository.findByUserIdOrderByCreatedAtDesc(testUserId))
+                .thenReturn(java.util.Arrays.asList(account2, account1)); // Newest first
+
+        java.util.List<AccountDto> result = accountService.listAccounts(testUserId);
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals(2L, result.get(0).getId(), "Newest account should be first");
+        assertEquals(1L, result.get(1).getId());
+    }
+
+    @Test
+    void testListAccounts_Empty() {
+        when(accountRepository.findByUserIdOrderByCreatedAtDesc(testUserId))
+                .thenReturn(java.util.Collections.emptyList());
+
+        java.util.List<AccountDto> result = accountService.listAccounts(testUserId);
+
+        assertNotNull(result);
+        assertEquals(0, result.size());
+    }
 }
