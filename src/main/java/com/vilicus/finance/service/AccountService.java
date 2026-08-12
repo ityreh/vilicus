@@ -142,6 +142,23 @@ public class AccountService {
     }
 
     /**
+     * List all accounts for the authenticated user.
+     *
+     * @param userId authenticated user ID
+     * @return list of account DTOs (ordered by creation date, newest first)
+     */
+    @Transactional(readOnly = true)
+    public java.util.List<AccountDto> listAccounts(Long userId) {
+        log.debug("Listing accounts for user: {}", userId);
+
+        java.util.List<Account> accounts = accountRepository.findByUserIdOrderByCreatedAtDesc(userId);
+
+        return accounts.stream()
+                .map(this::mapToDto)
+                .toList();
+    }
+
+    /**
      * Map Account entity to AccountDto.
      *
      * @param account Account entity

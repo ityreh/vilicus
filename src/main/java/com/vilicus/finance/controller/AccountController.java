@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * REST controller for account management endpoints.
  *
@@ -73,6 +75,80 @@ public class AccountController {
         log.info("Account created successfully: ID={}, IBAN={}", createdAccount.getId(), createdAccount.getIban());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(createdAccount);
+    }
+
+    /**
+     * List all accounts for the authenticated user.
+     *
+     * GET /api/accounts
+     *
+     * Response (200):
+     * [
+     *   {
+     *     "id": 1,
+     *     "name": "Checking Account",
+     *     "iban": "DE89370400440532013000",
+     *     "type": "BANK_ACCOUNT",
+     *     "currency": "EUR",
+     *     "balance": 1000.00,
+     *     "status": "active",
+     *     "createdAt": "2026-08-12T19:30:00",
+     *     "updatedAt": "2026-08-12T19:30:00"
+     *   },
+     *   ...
+     * ]
+     *
+     * @param authentication Spring Security authentication (JWT)
+     * @return list of accounts (200 OK)
+     */
+    @GetMapping
+    public ResponseEntity<List<AccountDto>> listAccounts(Authentication authentication) {
+        log.info("GET /api/accounts - Listing accounts for user: {}", authentication.getName());
+
+        Long userId = extractUserIdFromAuthentication(authentication);
+        List<AccountDto> accounts = accountService.listAccounts(userId);
+
+        log.info("Retrieved {} accounts for user {}", accounts.size(), userId);
+
+        return ResponseEntity.ok(accounts);
+    }
+
+    /**
+     * Get a specific account by ID.
+     *
+     * GET /api/accounts/{id}
+     *
+     * Response (200):
+     * {
+     *   "id": 1,
+     *   "name": "Checking Account",
+     *   "iban": "DE89370400440532013000",
+     *   "type": "BANK_ACCOUNT",
+     *   "currency": "EUR",
+     *   "balance": 1000.00,
+     *   "status": "active",
+     *   "createdAt": "2026-08-12T19:30:00",
+     *   "updatedAt": "2026-08-12T19:30:00"
+     * }
+     *
+     * @param authentication Spring Security authentication (JWT)
+     * @param id account ID
+     * @return account details (200 OK) or 404 if not found
+     * @throws ResourceNotFoundException if account not found or not owned by user
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<AccountDto> getAccount(
+            Authentication authentication,
+            @PathVariable Long id) {
+
+        log.info("GET /api/accounts/{} - Retrieving account for user: {}", id, authentication.getName());
+
+        Long userId = extractUserIdFromAuthentication(authentication);
+        AccountDto account = accountService.getAccount(userId, id);
+
+        log.info("Retrieved account {} for user {}", id, userId);
+
+        return ResponseEntity.ok(account);
     }
 
     /**
