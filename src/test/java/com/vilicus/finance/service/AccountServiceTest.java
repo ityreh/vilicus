@@ -2,6 +2,7 @@ package com.vilicus.finance.service;
 
 import com.vilicus.finance.dto.AccountDto;
 import com.vilicus.finance.dto.CreateAccountRequest;
+import com.vilicus.finance.dto.UpdateAccountRequest;
 import com.vilicus.finance.entity.Account;
 import com.vilicus.finance.entity.AccountType;
 import com.vilicus.finance.exception.ResourceNotFoundException;
@@ -290,5 +291,140 @@ class AccountServiceTest {
 
         assertNotNull(result);
         assertEquals(0, result.size());
+    }
+
+    @Test
+    void testUpdateAccount_Success() {
+        Account existing = Account.builder()
+                .id(1L)
+                .userId(testUserId)
+                .iban("DE89370400440532013000")
+                .name("Old Name")
+                .type(AccountType.BANK_ACCOUNT)
+                .currency("EUR")
+                .balance(BigDecimal.valueOf(1000))
+                .status("active")
+                .createdAt(LocalDateTime.now().minusDays(1))
+                .updatedAt(LocalDateTime.now().minusDays(1))
+                .build();
+
+        UpdateAccountRequest request = new UpdateAccountRequest();
+        request.setName("New Name");
+        request.setType("SAVINGS");
+        request.setCurrency("USD");
+
+        when(accountRepository.findByUserIdAndId(testUserId, 1L)).thenReturn(Optional.of(existing));
+        when(accountRepository.existsByUserIdAndName(testUserId, "New Name")).thenReturn(false);
+
+        Account updated = Account.builder()
+                .id(1L)
+                .userId(testUserId)
+                .iban("DE89370400440532013000") // Unchanged
+                .name("New Name")
+                .type(AccountType.SAVINGS)
+                .currency("USD")
+                .balance(BigDecimal.valueOf(1000)) // Unchanged
+                .status("active")
+                .createdAt(existing.getCreatedAt())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+        when(accountRepository.save(any(Account.class))).thenReturn(updated);
+
+        AccountDto result = accountService.updateAccount(testUserId, 1L, request);
+
+        assertNotNull(result);
+        assertEquals("New Name", result.getName());
+        assertEquals("SAVINGS", result.getType());
+        assertEquals("USD", result.getCurrency());
+        assertEquals("DE89370400440532013000", result.getIban()); // IBAN unchanged
+        assertEquals(BigDecimal.valueOf(1000), result.getBalance()); // Balance unchanged
+    }
+
+    @Test
+    void testUpdateAccount_DuplicateName_ThrowsException() {
+        Account existing = Account.builder()
+                .id(1L)
+                .userId(testUserId)
+                .iban("DE89370400440532013000")
+                .name("Old Name")
+                .type(AccountType.BANK_ACCOUNT)
+                .currency("EUR")
+                .balance(BigDecimal.valueOf(1000))
+                .status("active")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+        UpdateAccountRequest request = new UpdateAccountRequest();
+        request.setName("Existing Name");
+        request.setType("BANK_ACCOUNT");
+        request.setCurrency("EUR");
+
+        when(accountRepository.findByUserIdAndId(testUserId, 1L)).thenReturn(Optional.of(existing));
+        when(accountRepository.existsByUserIdAndName(testUserId, "Existing Name")).thenReturn(true);
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> accountService.updateAccount(testUserId, 1L, request)
+        );
+
+        assertEquals("You already have an account with this name", exception.getMessage());
+        verify(accountRepository, never()).save(any(Account.class));
+    }
+
+    @Test
+    void testUpdateAccount_NotFound_ThrowsException() {
+        UpdateAccountRequest request = new UpdateAccountRequest();
+        request.setName("New Name");
+        request.setType("BANK_ACCOUNT");
+        request.setCurrency("EUR");
+
+        when(accountRepository.findByUserIdAndId(testUserId, 999L)).thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(
+                ResourceNotFoundException.class,
+                () -> accountService.updateAccount(testUserId, 999L, request)
+        );
+
+        assertEquals("Account not found", exception.getMessage());
+    }
+
+    @Test
+    void testArchiveAccount_Success() {
+        Account active = Account.builder()
+                .id(1L)
+                .userId(testUserId)
+                .iban("DE89370400440532013000")
+                .name("Checking")
+                .type(AccountType.BANK_ACCOUNT)
+                .currency("EUR")
+                .balance(BigDecimal.valueOf(1000))
+                .status("active")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+        when(accountRepository.findByUserIdAndId(testUserId, 1L)).thenReturn(Optional.of(active));
+        when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // Call archive
+        accountService.archiveAccount(testUserId, 1L);
+
+        // Verify account was marked as archived
+        verify(accountRepository).save(argThat(account -> "archived".equals(account.getStatus())));
+    }
+
+    @Test
+    void testArchiveAccount_NotFound_ThrowsException() {
+        when(accountRepository.findByUserIdAndId(testUserId, 999L)).thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(
+                ResourceNotFoundException.class,
+                () -> accountService.archiveAccount(testUserId, 999L)
+        );
+
+        assertEquals("Account not found", exception.getMessage());
+        verify(accountRepository, never()).save(any(Account.class));
     }
 }

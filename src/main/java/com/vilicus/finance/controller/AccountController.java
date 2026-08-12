@@ -2,6 +2,7 @@ package com.vilicus.finance.controller;
 
 import com.vilicus.finance.dto.AccountDto;
 import com.vilicus.finance.dto.CreateAccountRequest;
+import com.vilicus.finance.dto.UpdateAccountRequest;
 import com.vilicus.finance.service.AccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -149,6 +150,85 @@ public class AccountController {
         log.info("Retrieved account {} for user {}", id, userId);
 
         return ResponseEntity.ok(account);
+    }
+
+    /**
+     * Update an existing account.
+     *
+     * PUT /api/accounts/{id}
+     *
+     * Mutable fields: name, type, currency
+     * Immutable fields: iban, userId, balance
+     *
+     * Request body:
+     * {
+     *   "name": "Updated Checking",
+     *   "type": "BANK_ACCOUNT",
+     *   "currency": "EUR"
+     * }
+     *
+     * Response (200):
+     * {
+     *   "id": 1,
+     *   "name": "Updated Checking",
+     *   "iban": "DE89370400440532013000",
+     *   "type": "BANK_ACCOUNT",
+     *   "currency": "EUR",
+     *   "balance": 1000.00,
+     *   "status": "active",
+     *   "createdAt": "2026-08-12T19:30:00",
+     *   "updatedAt": "2026-08-12T20:00:00"
+     * }
+     *
+     * @param authentication Spring Security authentication (JWT)
+     * @param id account ID
+     * @param request update request
+     * @return updated account (200 OK) or 404/400 on error
+     * @throws ResourceNotFoundException if account not found
+     * @throws IllegalArgumentException if validation fails
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<AccountDto> updateAccount(
+            Authentication authentication,
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateAccountRequest request) {
+
+        log.info("PUT /api/accounts/{} - Updating account for user: {}", id, authentication.getName());
+
+        Long userId = extractUserIdFromAuthentication(authentication);
+        AccountDto updated = accountService.updateAccount(userId, id, request);
+
+        log.info("Account updated successfully: ID={}", id);
+
+        return ResponseEntity.ok(updated);
+    }
+
+    /**
+     * Archive (soft delete) an account.
+     *
+     * DELETE /api/accounts/{id}
+     *
+     * Marks account as 'archived' (soft delete). Data remains in database.
+     *
+     * Response (204 No Content): Success
+     *
+     * @param authentication Spring Security authentication (JWT)
+     * @param id account ID
+     * @throws ResourceNotFoundException if account not found or not owned by user
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> archiveAccount(
+            Authentication authentication,
+            @PathVariable Long id) {
+
+        log.info("DELETE /api/accounts/{} - Archiving account for user: {}", id, authentication.getName());
+
+        Long userId = extractUserIdFromAuthentication(authentication);
+        accountService.archiveAccount(userId, id);
+
+        log.info("Account archived successfully: ID={}", id);
+
+        return ResponseEntity.noContent().build();
     }
 
     /**

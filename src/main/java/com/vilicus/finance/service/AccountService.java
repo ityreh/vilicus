@@ -2,6 +2,7 @@ package com.vilicus.finance.service;
 
 import com.vilicus.finance.dto.AccountDto;
 import com.vilicus.finance.dto.CreateAccountRequest;
+import com.vilicus.finance.dto.UpdateAccountRequest;
 import com.vilicus.finance.entity.Account;
 import com.vilicus.finance.entity.AccountType;
 import com.vilicus.finance.exception.ResourceNotFoundException;
@@ -156,6 +157,94 @@ public class AccountService {
         return accounts.stream()
                 .map(this::mapToDto)
                 .toList();
+    }
+
+    /**
+     * Update an existing account (mutable fields only).
+     *
+     * Mutable fields: name, type, currency
+     * Immutable fields: iban, userId, balance (cannot be changed)
+     *
+     * @param userId authenticated user ID
+     * @param accountId account ID to update
+     * @param request update request (name, type, currency)
+     * @return updated account DTO
+     * @throws ResourceNotFoundException if account not found or not owned by user
+     * @throws IllegalArgumentException if validation fails
+     */
+    @Transactional
+    public AccountDto updateAccount(Long userId, Long accountId, UpdateAccountRequest request) {
+        log.debug("Updating account {} for user {}", accountId, userId);
+
+        // Retrieve account (with ownership check)
+        Account account = accountRepository.findByUserIdAndId(userId, accountId)
+                .orElseThrow(() -> {
+                    log.warn("Account not found or user mismatch: userId={}, accountId={}", userId, accountId);
+                    return new ResourceNotFoundException("Account not found");
+                });
+
+        // Validate account type
+        AccountType accountType;
+        try {
+            accountType = AccountType.valueOf(request.getType());
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid account type: {}", request.getType());
+            throw new IllegalArgumentException("Invalid account type: " + request.getType());
+        }
+
+        // Validate currency code
+        if (!request.getCurrency().matches("^[A-Z]{3}$")) {
+            log.warn("Invalid currency code: {}", request.getCurrency());
+            throw new IllegalArgumentException("Currency must be 3 uppercase letters (ISO 4217)");
+        }
+
+        // Check for duplicate name (if name is changing)
+        if (!account.getName().equals(request.getName()) &&
+            accountRepository.existsByUserIdAndName(userId, request.getName())) {
+            log.warn("Duplicate account name for user {}: {}", userId, request.getName());
+            throw new IllegalArgumentException("You already have an account with this name");
+        }
+
+        // Update mutable fields
+        account.setName(request.getName());
+        account.setType(accountType);
+        account.setCurrency(request.getCurrency());
+        account.setUpdatedAt(LocalDateTime.now());
+
+        // Save and return
+        Account updated = accountRepository.save(account);
+        log.info("Account updated successfully: ID={}", accountId);
+
+        return mapToDto(updated);
+    }
+
+    /**
+     * Archive (soft delete) an account.
+     *
+     * Changes status from 'active' to 'archived'.
+     * Data remains in database but is marked as inactive.
+     *
+     * @param userId authenticated user ID
+     * @param accountId account ID to archive
+     * @throws ResourceNotFoundException if account not found or not owned by user
+     */
+    @Transactional
+    public void archiveAccount(Long userId, Long accountId) {
+        log.debug("Archiving account {} for user {}", accountId, userId);
+
+        // Retrieve account (with ownership check)
+        Account account = accountRepository.findByUserIdAndId(userId, accountId)
+                .orElseThrow(() -> {
+                    log.warn("Account not found or user mismatch: userId={}, accountId={}", userId, accountId);
+                    return new ResourceNotFoundException("Account not found");
+                });
+
+        // Soft delete: mark as archived
+        account.archive();
+
+        // Save
+        accountRepository.save(account);
+        log.info("Account archived successfully: ID={}", accountId);
     }
 
     /**
