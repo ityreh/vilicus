@@ -43,6 +43,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
+    @ExceptionHandler(CamtParseException.class)
+    public ResponseEntity<?> handleCamtParseException(CamtParseException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", "CAMT.052 parsing failed: " + ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleGlobalException(Exception ex) {
         Map<String, String> error = new HashMap<>();
