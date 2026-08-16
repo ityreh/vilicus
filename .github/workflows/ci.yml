@@ -63,5 +63,5 @@ jobs:
           fetch-depth: 0
 
       - name: Validate commit messages
-        uses: compilerla/conventional-pre-commit@v2
+        uses: wagoid/commitlint-github-action@v5
         if: github.event_name == 'pull_request'
