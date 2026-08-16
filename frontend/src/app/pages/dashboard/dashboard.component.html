@@ -1,43 +1,142 @@
 <div class="dashboard">
+  <!-- Header with date-range selector -->
   <div class="dashboard-header">
     <h1>Dashboard</h1>
     <div class="date-range-selector">
       <div class="seg">
-        <button class="seg-opt active">Last 30 days</button>
-        <button class="seg-opt">This month</button>
-        <button class="seg-opt">Last 3 months</button>
+        <button class="seg-opt" [class.active]="selectedRange === '30d'" (click)="onDateRangeChange('30d')">
+          Last 30 days
+        </button>
+        <button class="seg-opt" [class.active]="selectedRange === 'month'" (click)="onDateRangeChange('month')">
+          This month
+        </button>
+        <button class="seg-opt" [class.active]="selectedRange === '3m'" (click)="onDateRangeChange('3m')">
+          Last 3 months
+        </button>
       </div>
     </div>
   </div>
 
   <!-- Account cards -->
   <div class="account-cards">
-    <div class="card">
-      <div class="card-kicker">Checking</div>
-      <div class="card-title">$5,234.50</div>
-      <div class="card-meta">Last import: Aug 15, 2026</div>
-    </div>
-    <div class="card">
-      <div class="card-kicker">Savings</div>
-      <div class="card-title">$12,000.00</div>
-      <div class="card-meta">Last import: Aug 10, 2026</div>
+    <div class="card account-card" *ngFor="let account of accounts" [title]="'View ' + account.name + ' transactions'">
+      <div class="card-kicker">{{ account.type }}</div>
+      <div class="card-title">{{ formatCurrency(account.balance) }}</div>
+      <div class="card-meta">Last import: {{ account.lastImportDate }}</div>
     </div>
   </div>
 
-  <!-- Charts + Recent transactions -->
-  <div class="dashboard-grid">
+  <!-- Charts section: donut + trend line -->
+  <div class="charts-grid">
+    <!-- Category spending donut chart -->
     <div class="card">
       <h4>Spending by Category</h4>
-      <p class="text-muted">[Donut chart to be implemented]</p>
+      <div class="chart-container">
+        <div class="donut-wrapper">
+          <!-- Donut ring -->
+          <div class="donut-chart" [style.background]="getConiGradient()">
+            <!-- Center text -->
+            <div class="donut-center">
+              <div class="donut-label">Total spend</div>
+              <div class="donut-value">{{ formatCurrency(totalSpend) }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="chart-legend">
+          <div class="legend-item" *ngFor="let cat of spendingByCategory">
+            <div class="legend-swatch" [style.background-color]="cat.color"></div>
+            <div class="legend-text">
+              <div class="legend-name">{{ cat.category }}</div>
+              <div class="legend-amount">{{ formatCurrency(cat.amount) }} ({{ cat.percentage }}%)</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- Trend line chart -->
     <div class="card">
       <h4>Spending Trend</h4>
-      <p class="text-muted">[Line chart to be implemented]</p>
+      <div class="chart-container">
+        <svg viewBox="0 0 400 200" class="trend-chart">
+          <!-- Grid lines (optional) -->
+          <line x1="20" y1="180" x2="380" y2="180" class="grid-line"></line>
+
+          <!-- Income line (solid) -->
+          <polyline
+            [attr.points]="getTrendIncomeeSVGPath()"
+            class="trend-line income"
+            fill="none"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round">
+          </polyline>
+
+          <!-- Expense line (dashed) -->
+          <polyline
+            [attr.points]="getTrendSVGPath()"
+            class="trend-line expense"
+            fill="none"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-dasharray="5,5">
+          </polyline>
+
+          <!-- Month labels -->
+          <text *ngFor="let trend of monthlyTrend; let i = index"
+            [attr.x]="20 + (i / (monthlyTrend.length - 1)) * 360"
+            y="195"
+            class="chart-label">
+            {{ trend.month }}
+          </text>
+        </svg>
+
+        <!-- Legend -->
+        <div class="chart-legend-inline">
+          <span class="legend-item-inline">
+            <span class="legend-dot income"></span> Income
+          </span>
+          <span class="legend-item-inline">
+            <span class="legend-dot expense"></span> Expenses
+          </span>
+        </div>
+      </div>
     </div>
   </div>
 
+  <!-- Recent transactions table -->
   <div class="card">
-    <h4>Recent Transactions</h4>
-    <p class="text-muted">[Transaction table to be implemented]</p>
+    <div class="card-header">
+      <h4>Recent Transactions</h4>
+      <a href="#" class="text-muted">View all →</a>
+    </div>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Description</th>
+          <th>Category</th>
+          <th class="text-right">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let txn of recentTransactions">
+          <td class="text-muted">{{ txn.date }}</td>
+          <td>{{ txn.description }}</td>
+          <td>
+            <span *ngIf="txn.category" class="tag tag-accent">{{ txn.category }}</span>
+            <span *ngIf="!txn.category" class="tag tag-outline">uncategorized</span>
+          </td>
+          <td class="text-right amount" [class.income]="txn.direction === 'income'">
+            <span *ngIf="txn.direction === 'income'" class="income-amount">+{{ formatCurrency(txn.amount) }}</span>
+            <span *ngIf="txn.direction === 'expense'">{{ formatCurrency(txn.amount) }}</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </div>
