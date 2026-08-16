@@ -1,0 +1,129 @@
+<div class="accounts">
+  <!-- List View -->
+  <div *ngIf="!showDetailView">
+    <div class="accounts-header">
+      <h1>Accounts</h1>
+      <button class="btn btn-primary" (click)="onOpenAddModal()">+ Add Account</button>
+    </div>
+
+    <div class="card">
+      <div class="table-wrapper">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>IBAN</th>
+              <th class="text-right">Balance</th>
+              <th>Last Import</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let account of accounts" (click)="onSelectAccount(account)" class="clickable-row">
+              <td><strong>{{ account.name }}</strong></td>
+              <td class="iban-text">{{ account.iban }}</td>
+              <td class="text-right amount">{{ formatCurrency(account.balance) }}</td>
+              <td class="text-muted">{{ account.lastImportDate }}</td>
+              <td class="action-col">
+                <button class="btn btn-ghost" (click)="onDeleteAccount(account); $event.stopPropagation()">Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail View -->
+  <div *ngIf="showDetailView && selectedAccount" class="detail-view">
+    <button class="btn btn-ghost back-button" (click)="onBackToList()">← Back</button>
+
+    <h1>{{ selectedAccount.name }}</h1>
+
+    <!-- Balance Card -->
+    <div class="detail-grid">
+      <div class="card">
+        <div class="card-kicker">Current Balance</div>
+        <div class="card-title-large">{{ formatCurrency(selectedAccount.balance) }}</div>
+        <div class="card-meta">{{ selectedAccount.type }} Account</div>
+        <div class="card-meta">IBAN: <span class="iban-text">{{ selectedAccount.iban }}</span></div>
+      </div>
+
+      <!-- Balance History Chart -->
+      <div class="card">
+        <h4>Balance History (6 Months)</h4>
+        <svg viewBox="0 0 400 150" class="trend-chart">
+          <polyline
+            [attr.points]="getTrendSVGPath()"
+            class="trend-line"
+            fill="none"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round">
+          </polyline>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Import Log -->
+    <div class="card">
+      <h4>Import Log</h4>
+      <div class="table-wrapper">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>File</th>
+              <th class="text-right">Imported</th>
+              <th class="text-right">Duplicates</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let log of selectedAccount.importLog">
+              <td class="text-muted">{{ log.date }}</td>
+              <td>{{ log.fileName }}</td>
+              <td class="text-right">{{ log.importedCount }}</td>
+              <td class="text-right">{{ log.duplicatesCount }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Linked Transactions -->
+    <div class="card">
+      <div class="card-header">
+        <h4>Recent Transactions</h4>
+        <a href="#" class="text-muted">View all →</a>
+      </div>
+      <p class="text-muted">Last 5 transactions for this account</p>
+    </div>
+  </div>
+
+  <!-- Add Account Modal -->
+  <div class="dialog-backdrop" *ngIf="showAddModal" (click)="onCloseAddModal()">
+    <div class="dialog" (click)="$event.stopPropagation()">
+      <h3>Add New Account</h3>
+
+      <div class="field">
+        <label>Account Name</label>
+        <input type="text" class="input" [(ngModel)]="newAccount.name" placeholder="e.g., Checking">
+      </div>
+
+      <div class="field">
+        <label>IBAN</label>
+        <input type="text" class="input" [(ngModel)]="newAccount.iban" placeholder="DE89370400440532013000">
+      </div>
+
+      <div class="field">
+        <label>Opening Balance</label>
+        <input type="number" class="input" [(ngModel)]="newAccount.openingBalance" placeholder="0.00">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-secondary" (click)="onCloseAddModal()">Cancel</button>
+        <button class="btn btn-primary" (click)="onSaveNewAccount()">Save Account</button>
+      </div>
+    </div>
+  </div>
+</div>

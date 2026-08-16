@@ -1,0 +1,163 @@
+<div class="import-wizard">
+  <h1>Import Transactions</h1>
+
+  <!-- Step Indicator -->
+  <div class="step-indicator">
+    <div class="step" [class.active]="state.currentStep >= 1">
+      <div class="step-number">1</div>
+      <div class="step-label">Upload</div>
+    </div>
+    <div class="step-connector" [class.active]="state.currentStep >= 2"></div>
+    <div class="step" [class.active]="state.currentStep >= 2">
+      <div class="step-number">2</div>
+      <div class="step-label">Preview</div>
+    </div>
+    <div class="step-connector" [class.active]="state.currentStep >= 3"></div>
+    <div class="step" [class.active]="state.currentStep >= 3">
+      <div class="step-number">3</div>
+      <div class="step-label">Result</div>
+    </div>
+  </div>
+
+  <!-- Step 1: Upload -->
+  <div class="step-content" *ngIf="state.currentStep === 1">
+    <div class="card">
+      <h3>Step 1: Upload Statement</h3>
+
+      <!-- Account Selector -->
+      <div class="field">
+        <label>Select Account</label>
+        <select class="select" [(ngModel)]="state.selectedAccount">
+          <option [value]="null">-- Choose account --</option>
+          <option *ngFor="let acct of accounts" [value]="acct.id">{{ acct.name }}</option>
+        </select>
+      </div>
+
+      <!-- Drag-drop file zone -->
+      <div
+        class="drop-zone"
+        [class.drag-over]="isDragOver"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)">
+        <div class="drop-zone-content">
+          <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" class="upload-icon">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <p class="drop-text">
+            <strong>Drag and drop</strong> your CAMT.052 .xml file here
+          </p>
+          <p class="drop-text-alt">or</p>
+          <label class="file-input-label">
+            <span class="btn btn-secondary">Browse Files</span>
+            <input type="file" accept=".xml" (change)="onFileSelected($event)" style="display: none;">
+          </label>
+          <p class="file-limit">Max file size: 25MB</p>
+        </div>
+      </div>
+
+      <!-- File chosen confirmation -->
+      <div *ngIf="state.selectedFile" class="file-chosen">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" class="check-icon">
+          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"></path>
+        </svg>
+        <div class="file-info">
+          <div class="file-name">{{ state.selectedFile.name }}</div>
+          <div class="file-size">{{ getFileSize(state.selectedFile.size) }}</div>
+        </div>
+      </div>
+
+      <!-- Error message -->
+      <div *ngIf="state.error" class="error-message">
+        {{ state.error }}
+      </div>
+
+      <!-- Actions -->
+      <div class="step-actions">
+        <button class="btn btn-secondary" (click)="onCancel()">Cancel</button>
+        <button
+          class="btn btn-primary"
+          [disabled]="!state.selectedAccount || !state.selectedFile"
+          (click)="onPreview()">
+          Preview →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Preview -->
+  <div class="step-content" *ngIf="state.currentStep === 2">
+    <div class="card">
+      <h3>Step 2: Preview Transactions</h3>
+
+      <!-- Summary -->
+      <div class="summary-box">
+        <p>
+          Found <strong>{{ state.totalTransactions }}</strong> transactions,
+          <strong>{{ state.duplicateCount }}</strong> duplicates detected.
+        </p>
+      </div>
+
+      <!-- Sample table -->
+      <div class="table-wrapper">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Description</th>
+              <th class="text-right">Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let txn of state.previewTransactions" [class.duplicate]="txn.isDuplicate">
+              <td class="text-muted">{{ txn.date }}</td>
+              <td>{{ txn.description }}</td>
+              <td class="text-right">{{ formatCurrency(txn.amount) }}</td>
+              <td>
+                <span *ngIf="txn.isDuplicate" class="tag tag-outline">duplicate</span>
+                <span *ngIf="!txn.isDuplicate" class="tag tag-accent">new</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Actions -->
+      <div class="step-actions">
+        <button class="btn btn-secondary" (click)="onCancel()">Cancel</button>
+        <button class="btn btn-primary" (click)="onConfirmImport()">Import →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: Result -->
+  <div class="step-content" *ngIf="state.currentStep === 3">
+    <div class="card result-card">
+      <!-- Success icon -->
+      <div class="success-icon">
+        <svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+      </div>
+
+      <!-- Success message -->
+      <h3 class="success-heading">Import Complete!</h3>
+      <p class="success-message">
+        Imported <strong>{{ state.importedCount }}</strong> transactions,
+        skipped <strong>{{ state.skippedCount }}</strong> duplicates.
+      </p>
+
+      <!-- View imported transactions link -->
+      <a href="/transactions" class="view-link">View imported transactions →</a>
+
+      <!-- Actions -->
+      <div class="step-actions">
+        <button class="btn btn-secondary" (click)="onReset()">Import another file</button>
+      </div>
+    </div>
+  </div>
+</div>

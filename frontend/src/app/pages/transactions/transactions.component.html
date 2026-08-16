@@ -1,0 +1,228 @@
+<div class="transactions">
+  <!-- Header -->
+  <div class="transactions-header">
+    <h1>Transactions</h1>
+    <button class="btn btn-primary">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="17 8 12 3 7 8"></polyline>
+        <line x1="12" y1="3" x2="12" y2="15"></line>
+      </svg>
+      Import
+    </button>
+  </div>
+
+  <!-- Filter Card -->
+  <div class="card filter-card">
+    <h4>Filters</h4>
+    <div class="filter-grid">
+      <!-- Search -->
+      <div class="field">
+        <label>Search</label>
+        <input
+          type="text"
+          class="input"
+          [(ngModel)]="filters.search"
+          (ngModelChange)="onFilterChange()"
+          placeholder="Description or counterparty">
+      </div>
+
+      <!-- Account -->
+      <div class="field">
+        <label>Account</label>
+        <select class="select" [(ngModel)]="filters.account" (ngModelChange)="onFilterChange()">
+          <option value="all">All accounts</option>
+          <option value="1">Checking</option>
+          <option value="2">Savings</option>
+        </select>
+      </div>
+
+      <!-- Category -->
+      <div class="field">
+        <label>Category</label>
+        <select class="select" [(ngModel)]="filters.category" (ngModelChange)="onFilterChange()">
+          <option value="all">All categories</option>
+          <option *ngFor="let cat of getUniqueCategoryNames()" [value]="cat">{{ cat }}</option>
+        </select>
+      </div>
+
+      <!-- Date From -->
+      <div class="field">
+        <label>From</label>
+        <input
+          type="date"
+          class="input"
+          [(ngModel)]="filters.dateFrom"
+          (ngModelChange)="onFilterChange()">
+      </div>
+
+      <!-- Date To -->
+      <div class="field">
+        <label>To</label>
+        <input
+          type="date"
+          class="input"
+          [(ngModel)]="filters.dateTo"
+          (ngModelChange)="onFilterChange()">
+      </div>
+
+      <!-- Direction (All/Income/Expense) -->
+      <div class="field">
+        <label>Direction</label>
+        <div class="seg">
+          <button class="seg-opt" [class.active]="filters.direction === 'all'" (click)="filters.direction = 'all'; onFilterChange()">All</button>
+          <button class="seg-opt" [class.active]="filters.direction === 'income'" (click)="filters.direction = 'income'; onFilterChange()">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+              <polyline points="17 6 23 6 23 12"></polyline>
+            </svg>
+            Income
+          </button>
+          <button class="seg-opt" [class.active]="filters.direction === 'expense'" (click)="filters.direction = 'expense'; onFilterChange()">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline>
+              <polyline points="17 18 23 18 23 12"></polyline>
+            </svg>
+            Expense
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bulk Action Bar (conditional) -->
+  <div class="bulk-action-bar" *ngIf="showBulkActionBar">
+    <span class="action-count">{{ selectedIds.size }} transaction<span *ngIf="selectedIds.size !== 1">s</span> selected</span>
+    <select class="select bulk-category-select" [(ngModel)]="bulkRecategorizeCategory">
+      <option [value]="null">Recategorize as...</option>
+      <option *ngFor="let cat of getUniqueCategoryNames()" [value]="cat">{{ cat }}</option>
+    </select>
+    <button class="btn btn-secondary" (click)="onBulkRecategorize()" [disabled]="!bulkRecategorizeCategory">
+      Apply
+    </button>
+    <button class="btn btn-secondary" (click)="onBulkArchive()">
+      Archive
+    </button>
+    <button class="btn btn-ghost" (click)="onClearSelection()">
+      Clear
+    </button>
+  </div>
+
+  <!-- Transactions Table Card -->
+  <div class="card">
+    <!-- Table wrapper for responsive scrolling -->
+    <div class="table-wrapper">
+      <table class="table">
+        <thead>
+          <tr>
+            <th class="checkbox-col">
+              <input
+                type="checkbox"
+                [(ngModel)]="isSelectAllChecked"
+                (ngModelChange)="onSelectAllChange()">
+            </th>
+            <th (click)="onColumnHeaderClick('date')" class="sortable">
+              Date {{ getSortIndicator('date') }}
+            </th>
+            <th>Description</th>
+            <th>Counterparty</th>
+            <th>Category</th>
+            <th (click)="onColumnHeaderClick('amount')" class="sortable text-right">
+              Amount {{ getSortIndicator('amount') }}
+            </th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let txn of displayedTransactions">
+            <td class="checkbox-col">
+              <input
+                type="checkbox"
+                [checked]="isRowSelected(txn.id)"
+                (change)="onRowCheckboxChange(txn.id)">
+            </td>
+            <td class="date-col text-muted">{{ txn.date }}</td>
+            <td class="description-col" (click)="openTransactionDetail(txn)">
+              <a href="#">{{ txn.description }}</a>
+            </td>
+            <td class="counterparty-col">{{ txn.counterparty }}</td>
+            <td class="category-col">
+              <span *ngIf="txn.category" class="tag tag-accent">{{ txn.category }}</span>
+              <span *ngIf="!txn.category" class="tag tag-outline">uncategorized</span>
+            </td>
+            <td class="amount-col text-right" [class.income]="txn.direction === 'income'">
+              <span *ngIf="txn.direction === 'income'" class="income-amount">+{{ formatCurrency(txn.amount) }}</span>
+              <span *ngIf="txn.direction === 'expense'">{{ formatCurrency(txn.amount) }}</span>
+            </td>
+            <td class="status-col">
+              <span *ngIf="txn.status === 'categorized'" class="tag tag-accent">categorized</span>
+              <span *ngIf="txn.status === 'imported'" class="tag tag-outline">imported</span>
+              <span *ngIf="txn.status === 'archived'" class="tag tag-outline">archived</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination footer -->
+    <div class="pagination-footer">
+      <div class="results-summary">
+        Showing {{ (currentPage - 1) * pageSize + 1 }} to {{ Math.min(currentPage * pageSize, totalCount) }} of {{ totalCount }} transactions
+      </div>
+      <div class="pagination-controls">
+        <button class="btn btn-secondary" [disabled]="currentPage === 1" (click)="onPreviousPage()">
+          ← Previous
+        </button>
+        <span class="page-indicator">Page {{ currentPage }} of {{ totalPages }}</span>
+        <button class="btn btn-secondary" [disabled]="currentPage === totalPages" (click)="onNextPage()">
+          Next →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transaction Detail Modal -->
+  <div class="dialog-backdrop" *ngIf="showDetailModal" (click)="closeDetailModal()">
+    <div class="dialog" (click)="$event.stopPropagation()">
+      <h3>Transaction Detail</h3>
+      <div *ngIf="selectedTransaction" class="transaction-detail">
+        <div class="detail-row">
+          <span class="detail-label">Date</span>
+          <span class="detail-value">{{ selectedTransaction.date }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Description</span>
+          <span class="detail-value">{{ selectedTransaction.description }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Counterparty</span>
+          <span class="detail-value">{{ selectedTransaction.counterparty }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Amount</span>
+          <span class="detail-value" [class.income]="selectedTransaction.direction === 'income'">
+            <span *ngIf="selectedTransaction.direction === 'income'">+</span>{{ formatCurrency(selectedTransaction.amount) }}
+          </span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Category</span>
+          <span class="detail-value">
+            <span *ngIf="selectedTransaction.category" class="tag tag-accent">{{ selectedTransaction.category }}</span>
+            <span *ngIf="!selectedTransaction.category" class="tag tag-outline">uncategorized</span>
+          </span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Status</span>
+          <span class="detail-value">
+            <span class="tag" [ngClass]="{'tag-accent': selectedTransaction.status === 'categorized', 'tag-outline': selectedTransaction.status !== 'categorized'}">
+              {{ selectedTransaction.status }}
+            </span>
+          </span>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" (click)="closeDetailModal()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

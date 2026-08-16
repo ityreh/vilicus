@@ -1,0 +1,56 @@
+<div class="settings">
+  <h1>Settings</h1>
+
+  <!-- Profile Card -->
+  <div class="card">
+    <h4>Profile</h4>
+    <div class="field">
+      <label>Name</label>
+      <input type="text" class="input" [(ngModel)]="profile.name">
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" class="input" [(ngModel)]="profile.email">
+    </div>
+    <button class="btn btn-primary" (click)="onSaveProfile()">Save Profile</button>
+  </div>
+
+  <!-- Categories Card -->
+  <div class="card">
+    <h4>Categories</h4>
+    <div class="categories-list">
+      <div class="category-chip" *ngFor="let cat of categories">
+        <span>{{ cat }}</span>
+        <button class="remove-btn" (click)="onRemoveCategory(cat)">×</button>
+      </div>
+    </div>
+    <div class="add-category">
+      <input type="text" class="input" [(ngModel)]="newCategory" placeholder="New category" (keyup.enter)="onAddCategory()">
+      <button class="btn btn-secondary" (click)="onAddCategory()">Add</button>
+    </div>
+  </div>
+
+  <!-- Data Export Card -->
+  <div class="card">
+    <h4>Data Export</h4>
+    <p class="text-muted">Download your financial data</p>
+    <div class="export-buttons">
+      <button class="btn btn-secondary" (click)="onExportCSV()">Export CSV</button>
+      <button class="btn btn-secondary" (click)="onExportJSON()">Export JSON</button>
+    </div>
+    <div *ngIf="exportMessage" class="export-message">
+      {{ exportMessage }}
+    </div>
+  </div>
+
+  <!-- Accounts Card -->
+  <div class="card">
+    <h4>Accounts</h4>
+    <div class="account-list">
+      <div class="account-item" *ngFor="let account of accounts">
+        <span>{{ account.name }}</span>
+        <button class="btn btn-ghost" (click)="onDeleteAccount(account.id)">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
