@@ -1,0 +1,86 @@
+<div class="analytics">
+  <h1>Analytics</h1>
+
+  <!-- Date range selector -->
+  <div class="controls">
+    <div class="seg">
+      <button class="seg-opt" [class.active]="dateRange === '3m'" (click)="dateRange = '3m'; onDateRangeChange()">3 months</button>
+      <button class="seg-opt" [class.active]="dateRange === '6m'" (click)="dateRange = '6m'; onDateRangeChange()">6 months</button>
+      <button class="seg-opt" [class.active]="dateRange === '12m'" (click)="dateRange = '12m'; onDateRangeChange()">12 months</button>
+    </div>
+  </div>
+
+  <!-- Spending by category -->
+  <div class="grid-2">
+    <div class="card">
+      <h4>Spending by Category</h4>
+      <div class="donut-wrapper">
+        <div class="donut-chart" [style.background]="getConiGradient()">
+          <div class="donut-center">
+            <div class="donut-label">Total</div>
+            <div class="donut-value">{{ formatCurrency(totalSpending) }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h4>Category Breakdown</h4>
+      <div class="category-table">
+        <div class="category-row" *ngFor="let cat of categorySpending">
+          <div class="category-name">{{ cat.category }}</div>
+          <div class="category-amount">{{ formatCurrency(cat.total) }}</div>
+          <div class="category-percent">{{ cat.percentage }}%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Monthly trends -->
+  <div class="card">
+    <h4>Income vs Expenses</h4>
+    <svg viewBox="0 0 500 250" class="trend-chart">
+      <polyline
+        [attr.points]="getMonthlyChartPath('income')"
+        class="trend-line income"
+        fill="none"
+        stroke-width="2"
+        stroke-linecap="round">
+      </polyline>
+      <polyline
+        [attr.points]="getMonthlyChartPath('expense')"
+        class="trend-line expense"
+        fill="none"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-dasharray="5,5">
+      </polyline>
+
+      <text *ngFor="let month of monthlyData; let i = index"
+        [attr.x]="30 + (i / (monthlyData.length - 1)) * 440"
+        y="235"
+        class="chart-label">
+        {{ month.month }}
+      </text>
+    </svg>
+
+    <div class="chart-legend">
+      <span><span class="legend-dot income"></span> Income</span>
+      <span><span class="legend-dot expense"></span> Expenses</span>
+    </div>
+  </div>
+
+  <!-- Top merchants -->
+  <div class="card">
+    <h4>Top Merchants</h4>
+    <div class="merchant-list">
+      <div class="merchant-item" *ngFor="let merchant of topMerchants">
+        <div class="merchant-name">{{ merchant.name }}</div>
+        <div class="merchant-bar-wrapper">
+          <div class="merchant-bar" [style.width.%]="getBarWidth(merchant)"></div>
+        </div>
+        <div class="merchant-amount">{{ formatCurrency(merchant.total) }}</div>
+      </div>
+    </div>
+  </div>
+</div>

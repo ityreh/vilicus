@@ -1,0 +1,158 @@
+/* Navbar styling using Nocturne design tokens */
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-4) var(--space-6);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-divider);
+  gap: var(--space-6);
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--color-text);
+  cursor: pointer;
+  padding: 0;
+  margin-right: var(--space-2);
+  transition: color 0.2s;
+}
+
+.hamburger:hover {
+  color: var(--color-accent);
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--color-text);
+  text-decoration: none;
+  font-family: var(--font-heading);
+}
+
+.nav-brand svg {
+  color: var(--color-accent);
+}
+
+.navbar-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.account-select {
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-bg);
+  color: var(--color-text);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 14px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.account-select:hover {
+  border-color: var(--color-accent);
+}
+
+.account-select:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  background: var(--color-accent-900);
+  color: var(--color-accent-300);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--color-accent);
+}
+
+.user-name {
+  font-size: 14px;
+  color: var(--color-text);
+  font-family: var(--font-body);
+}
+
+.logout-btn {
+  background: none;
+  border: none;
+  color: var(--color-text);
+  cursor: pointer;
+  padding: var(--space-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.logout-btn:hover {
+  color: var(--color-accent);
+}
+
+.logout-btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Mobile responsive: show hamburger below 880px */
+@media (max-width: 880px) {
+  .hamburger {
+    display: block;
+  }
+
+  .navbar-center {
+    display: none;
+  }
+
+  .user-name {
+    display: none;
+  }
+
+  .navbar {
+    padding: var(--space-3) var(--space-4);
+    gap: var(--space-3);
+  }
+}
+
+/* Very small screens */
+@media (max-width: 576px) {
+  .nav-brand span {
+    display: none;
+  }
+
+  .navbar-right {
+    gap: var(--space-2);
+  }
+}
