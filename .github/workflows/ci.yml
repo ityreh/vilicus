@@ -59,7 +59,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Validate commit messages
-        uses: conventional-commits-rs/conventional-commits-lint@v0.1
+        uses: compilerla/conventional-pre-commit@v2
         if: github.event_name == 'pull_request'
