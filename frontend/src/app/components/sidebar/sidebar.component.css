@@ -1,0 +1,141 @@
+/* Sidebar styling using Nocturne design tokens */
+
+.sidebar {
+  width: 240px;
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-divider);
+  height: calc(100vh - 56px); /* Minus navbar height */
+  position: fixed;
+  left: 0;
+  top: 56px;
+  overflow-y: auto;
+  padding: var(--space-4) 0;
+  z-index: 100;
+  transition: transform 0.3s ease;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-6);
+  color: var(--color-text);
+  text-decoration: none;
+  font-family: var(--font-body);
+  font-size: 15px;
+  transition: background-color 0.2s, color 0.2s;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+}
+
+.nav-item:hover {
+  background-color: rgba(145, 132, 217, 0.1);
+  color: var(--color-accent-300);
+}
+
+.nav-item.active {
+  background-color: var(--color-accent-900);
+  color: var(--color-accent-300);
+  border-left-color: var(--color-accent);
+}
+
+.nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: currentColor;
+  flex-shrink: 0;
+}
+
+.nav-icon svg {
+  stroke: currentColor;
+}
+
+.nav-label {
+  white-space: nowrap;
+}
+
+/* Backdrop for mobile drawer */
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 99;
+}
+
+/* Mobile responsive: hamburger drawer (< 880px) */
+@media (max-width: 880px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 56px;
+    height: calc(100vh - 56px);
+    transform: translateX(-100%);
+    border-right: none;
+    box-shadow: var(--shadow-md);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-backdrop {
+    display: block;
+  }
+
+  .nav-label {
+    display: none;
+  }
+
+  .nav-item {
+    padding: var(--space-3) var(--space-4);
+    justify-content: center;
+  }
+
+  .nav-icon {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 576px) {
+  .sidebar {
+    width: 60px;
+  }
+
+  .nav-item {
+    padding: var(--space-3) var(--space-2);
+  }
+}
+
+/* Desktop: always visible (> 880px) */
+@media (min-width: 881px) {
+  .sidebar {
+    transform: translateX(0) !important;
+  }
+
+  .nav-label {
+    display: inline;
+  }
+
+  .nav-item {
+    padding: var(--space-3) var(--space-6);
+  }
+
+  .sidebar-backdrop {
+    display: none !important;
+  }
+}
