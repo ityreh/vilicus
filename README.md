@@ -30,9 +30,10 @@ git clone https://github.com/ityreh/vilicus.git
 cd vilicus
 
 # Start PostgreSQL
-docker-compose up -d
+docker compose up -d
 
 # Build and run Spring Boot
+cd backend
 mvn clean spring-boot:run
 ```
 
@@ -67,6 +68,7 @@ Frontend runs at `http://localhost:4200`
 
 **Backend tests:**
 ```bash
+cd backend
 mvn test          # All tests
 mvn test -Dtest=AccountControllerTest  # Specific test
 ```
@@ -85,11 +87,21 @@ vilicus/
 ├── .github/
 │   └── workflows/
 │       └── ci.yml                    # GitHub Actions CI/CD
-├── docs/
-│   ├── API.md                        # REST API reference
-│   ├── ARCHITECTURE.md               # System design
-│   ├── SETUP.md                      # Detailed setup guide
-│   └── DATABASE.md                   # Database schema
+├── backend/                           # Spring Boot 4.1 Application
+│   ├── pom.xml                        # Maven configuration
+│   └── src/
+│       ├── main/java/com/vilicus/finance/
+│       │   ├── config/                # Spring configuration
+│       │   ├── controller/            # REST endpoints
+│       │   ├── dto/                   # Data transfer objects
+│       │   ├── entity/                # JPA entities
+│       │   ├── repository/            # Data access (Spring Data JPA)
+│       │   ├── security/              # JWT & authentication
+│       │   └── service/               # Business logic
+│       ├── main/resources/
+│       │   ├── application.yml        # Spring Boot config
+│       │   └── db/                    # Liquibase migrations
+│       └── test/                      # JUnit 5 tests
 ├── frontend/                          # Angular 18+ Application
 │   ├── src/app/
 │   │   ├── components/                # Navbar, Sidebar, Layout
@@ -98,21 +110,12 @@ vilicus/
 │   │   ├── models/                    # TypeScript interfaces
 │   │   └── app.routes.ts              # Routing configuration
 │   └── README.md                      # Frontend-specific docs
-├── src/                               # Spring Boot Backend
-│   ├── main/java/com/vilicus/finance/
-│   │   ├── controller/                # REST endpoints
-│   │   ├── service/                   # Business logic
-│   │   ├── repository/                # Data access (Spring Data JPA)
-│   │   ├── entity/                    # JPA entities
-│   │   ├── dto/                       # Data transfer objects
-│   │   ├── config/                    # Spring configuration
-│   │   └── security/                  # JWT & authentication
-│   ├── test/                          # JUnit 5 tests
-│   └── resources/
-│       ├── application.yml            # Spring Boot config
-│       └── db/changelog/              # Liquibase migrations
+├── docs/
+│   ├── API.md                         # REST API reference
+│   ├── ARCHITECTURE.md                # System design
+│   └── SETUP.md                       # Detailed setup guide
 ├── docker-compose.yml                 # PostgreSQL 18 + PgAdmin
-├── pom.xml                            # Maven configuration
+├── package.json                       # Repository tooling
 └── README.md                          # This file
 ```
 
@@ -145,17 +148,11 @@ vilicus/
 
 ### Branch Strategy
 ```
-main                    ← Production (all PRs merged here)
-├── develop            ← Integration branch
-│   ├── feature/fe-1-layout-shell         ✅ Merged
-│   ├── feature/fe-2-dashboard            ✅ Merged
-│   ├── feature/fe-3-transactions         ✅ Merged
-│   ├── feature/fe-4-import-wizard        ✅ Merged
-│   ├── feature/fe-5-accounts             ✅ Merged
-│   ├── feature/fe-6-analytics            ✅ Merged
-│   ├── feature/fe-7-settings             ✅ Merged
-│   └── feature/fe-8-api-integration      ✅ Merged
+main        ← Production
+└── develop ← Integration branch
 ```
+
+All feature work is merged into `develop`; completed feature branches are deleted.
 
 ### Commit Messages
 Follow [Conventional Commits](https://www.conventionalcommits.org/):
@@ -169,8 +166,9 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 
 ### CI/CD Pipeline
 - **Runs on:** Push to `main`/`develop`, Pull Requests
-- **Checks:** 
-  - Maven build + all 177 backend tests
+- **Checks:**
+  - Backend: Maven build + all 177 tests
+  - Frontend: production build
   - Conventional commit linting
   - Code coverage (Codecov integration)
 - **Status:** ✅ All tests passing (330+ total)
@@ -180,13 +178,14 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 - **[SETUP.md](docs/SETUP.md)** — Detailed installation & configuration guide
 - **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** — Full system design & decisions
 - **[API.md](docs/API.md)** — Complete REST API reference
-- **[DATABASE.md](docs/DATABASE.md)** — Entity relationships & schema
 - **[frontend/README.md](frontend/README.md)** — Angular frontend guide
 
 ## Testing
 
 ### Backend
 ```bash
+cd backend
+
 # All tests
 mvn test
 
@@ -195,7 +194,7 @@ mvn test -Dtest=TransactionControllerTest
 
 # With coverage
 mvn test jacoco:report
-# View report: target/site/jacoco/index.html
+# View report: backend/target/site/jacoco/index.html
 ```
 
 **Test Results:** 177 tests ✅ (100% pass rate)
@@ -218,17 +217,13 @@ ng test --watch=false --code-coverage
 
 ### Backend
 ```bash
+cd backend
+
 # Build JAR
 mvn clean package
 
-# Build Docker image
-docker build -t vilicus-backend:latest .
-
-# Run container
-docker run -e SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/vilicus \
-           -e JWT_SECRET=your-secret-key \
-           -p 8080:8080 \
-           vilicus-backend:latest
+# Run the built JAR
+java -jar target/vilicus-finance-1.0.0-SNAPSHOT.jar
 ```
 
 ### Frontend

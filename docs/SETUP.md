@@ -13,7 +13,7 @@
 java -version         # Should show Java 25.x
 mvn -version          # Should show Maven 3.9+
 docker --version      # Should show Docker version
-docker-compose --version  # Should show Docker Compose version
+docker compose --version  # Should show Docker Compose version
 ```
 
 ---
@@ -51,13 +51,13 @@ JWT_SECRET=your-dev-secret-key-at-least-32-chars
 ## 3. Start PostgreSQL + PgAdmin
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 Verify services are running:
 
 ```bash
-docker-compose ps
+docker compose ps
 ```
 
 You should see:
@@ -88,6 +88,7 @@ vilicus-pgadmin    Up
 ## 4. Build the Backend
 
 ```bash
+cd backend
 mvn clean install
 ```
 
@@ -103,6 +104,7 @@ This will:
 ### Option A: From Maven
 
 ```bash
+cd backend
 mvn spring-boot:run
 ```
 
@@ -117,8 +119,9 @@ mvn spring-boot:run
 ### Option C: From Built JAR
 
 ```bash
+cd backend
 mvn clean package
-java -jar target/vilicus-backend-1.0.0.jar
+java -jar target/vilicus-finance-1.0.0-SNAPSHOT.jar
 ```
 
 ---
@@ -144,6 +147,7 @@ curl http://localhost:8080/actuator/health
 ### All Tests
 
 ```bash
+cd backend
 mvn test
 ```
 
@@ -159,7 +163,7 @@ mvn test -Dtest=UserEntityTest
 mvn test jacoco:report
 ```
 
-Coverage report: `target/site/jacoco/index.html`
+Coverage report: `backend/target/site/jacoco/index.html`
 
 ---
 
@@ -168,26 +172,26 @@ Coverage report: `target/site/jacoco/index.html`
 ### Stop Services
 
 ```bash
-docker-compose down
+docker compose down
 ```
 
 ### Remove Volumes (reset database)
 
 ```bash
-docker-compose down -v
+docker compose down -v
 ```
 
 ### View Logs
 
 ```bash
-docker-compose logs -f postgres
-docker-compose logs -f pgadmin
+docker compose logs -f postgres
+docker compose logs -f pgadmin
 ```
 
 ### Access Postgres CLI
 
 ```bash
-docker-compose exec postgres psql -U postgres -d vilicus
+docker compose exec postgres psql -U postgres -d vilicus
 ```
 
 ---
@@ -205,7 +209,7 @@ docker-compose exec postgres psql -U postgres -d vilicus
 3. **Run Configurations:**
    - Edit Configurations → + Maven
    - Name: `Spring Boot Dev`
-   - Working directory: `$PROJECT_DIR`
+   - Working directory: `$PROJECT_DIR/backend`
    - Command: `spring-boot:run`
    - Profiles: (leave empty)
 
@@ -249,8 +253,8 @@ docker compose up -d  # v2 syntax
 
 **Solution:** Ensure PostgreSQL is running:
 ```bash
-docker-compose ps
-docker-compose logs postgres
+docker compose ps
+docker compose logs postgres
 ```
 
 ### Issue: Port 5432 Already in Use
@@ -280,8 +284,7 @@ docker ps  # Should work without errors
 
 1. Read the [Architecture](ARCHITECTURE.md) document
 2. Review the [API Specification](API.md)
-3. Check the [Implementation Roadmap](ROADMAP.md) for Phase 1 tasks
-4. Create a feature branch: `git checkout -b feature/your-feature develop`
+3. Create a feature branch: `git checkout -b feature/your-feature develop`
 
 ---
 

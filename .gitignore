@@ -33,11 +33,14 @@ logs/
 dist/
 build/
 
-# Node (if applicable)
+# Node / Angular
 node_modules/
 npm-debug.log
 yarn-error.log
 .yarn/cache
+.angular/
+coverage/
+*.tsbuildinfo
 
 # Temporary
 tmp/

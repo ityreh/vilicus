@@ -5,7 +5,12 @@
   "private": true,
   "scripts": {
     "prepare": "husky install",
-    "commit": "cz commit"
+    "commit": "cz commit",
+    "backend:dev": "mvn -f backend/pom.xml spring-boot:run",
+    "backend:test": "mvn -f backend/pom.xml test",
+    "frontend:dev": "npm --prefix frontend start",
+    "frontend:build": "npm --prefix frontend run build",
+    "frontend:test": "npm --prefix frontend test"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.0.0",
